@@ -1,0 +1,5 @@
+Alignment
+Horizontal Scroll
+Markdown Preview
+Origami
+SublimeLinter
