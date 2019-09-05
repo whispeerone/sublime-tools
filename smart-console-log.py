@@ -8,7 +8,6 @@ class ExampleCommand(sublime_plugin.TextCommand):
 
 		currentLineRaw = self.view.substr(self.view.line(self.view.sel()[0]))
 
-
 		self.configureCursor(currentLineRaw)
 
 		variable = self.findTarget(currentLineRaw)
@@ -18,10 +17,12 @@ class ExampleCommand(sublime_plugin.TextCommand):
 	def printText(self, text):
 
 		lines = text.split("\n")
-
+		print(lines)
 		for line in lines:
 			self.printLine("\n")
 			self.printLine(line)
+
+		self.printLine("\n")
 
 	def printLine(self, line):
 		sublime.set_clipboard(line)
@@ -45,7 +46,10 @@ class ExampleCommand(sublime_plugin.TextCommand):
 
 	def configureCursor(self, line):
 		# TODO if return at first place of line
-		self.setCursorToEndOfLine(line)
+		if (line.strip().startswith("return")):
+			self.setCursorColumnPosition(0)
+		else:
+			self.setCursorToEndOfLine(line)
 
 	def setCursorToEndOfLine(self, line):
 		self.setCursorColumnPosition(len(line))
@@ -77,10 +81,7 @@ class ExampleCommand(sublime_plugin.TextCommand):
 		self.setCursorColumnPosition(bracketIndex + 1)
 
 		self.view.run_command('expand_selection', {"to": "brackets"})
-
-		sel = self.view.sel()
-		result = self.view.substr(sel[0]) 
-		print(result)
+		result = self.view.substr(self.view.sel()[0]) 
 
 		self.setCursorToEndOfLine(line)
 
