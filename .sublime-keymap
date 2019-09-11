@@ -46,9 +46,12 @@
   { "keys": ["ctrl+k", "ctrl+r"], "command": "resize_pane", "args": {"orientation": "rows"} },
 
   // { "keys": ["ctrl+u", "ctrl+l"], "command": "insert_snippet", "args" : { "name" : "Packages/User/console_log2.sublime-snippet"} }
-  // { "keys": ["ctrl+q"], "command": "example" }
+  { "keys": ["ctrl+q"], "command": "example" },
+  { "keys": ["ctrl+shift+q"], "command": "select_bracket" },
   { "keys": ["ctrl+1"], "command": "chain", "args": { "commands" : [["focus_group", {"group": 0 }],["zoom_pane", {"fraction": 0.7}]]}},
   { "keys": ["ctrl+2"], "command": "chain", "args": { "commands" : [["focus_group", {"group": 1 }],["zoom_pane", {"fraction": 0.7}]]}},
   { "keys": ["ctrl+3"], "command": "chain", "args": { "commands" : [["focus_group", {"group": 2 }],["zoom_pane", {"fraction": 0.7}]]}},
   { "keys": ["ctrl+4"], "command": "chain", "args": { "commands" : [["focus_group", {"group": 3 }],["zoom_pane", {"fraction": 0.7}]]}},
+
+
 ]
