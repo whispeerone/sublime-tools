@@ -2,31 +2,51 @@ import sublime
 import sublime_plugin
 import re
 
+class TargetParam:
+	def __init__(self, expression, type):
+		self.expression = expression
+		self.type = type
+
 class ExampleCommand(sublime_plugin.TextCommand):
 
 	def run(self, edit):
 
 		currentLineRaw = self.view.substr(self.view.line(self.view.sel()[0]))
 
-		self.configureCursor(currentLineRaw)
+		if (currentLineRaw.find("//") > -1):
+			currentLineRaw = currentLineRaw[0 : currentLineRaw.find("//")]
 
-		variable = self.findTarget(currentLineRaw)
-		text = self.prepareText(variable)
-		self.printText(text)
+		targetOptions = self.findTarget(currentLineRaw)
 
-	def printText(self, text):
+		if (targetOptions == None or targetOptions.expression == None):
+			self.setCursorToEndOfLine()
+			self.printLine(" //nothing found")
+			return 
 
-		lines = text.split("\n")
-		print(lines)
-		for line in lines:
+		text = self.prepareText(targetOptions.expression)
+
+		self.printText(text, targetOptions)
+
+	def printText(self, text, targetOptions):
+
+		self.configureCursor(targetOptions)
+
+		if (targetOptions.type == "assigment"):
 			self.printLine("\n")
-			self.printLine(line)
 
-		self.printLine("\n")
+		self.printLine(text)
+
+		if (targetOptions.type == "using"):
+			self.printLine("\n")
 
 	def printLine(self, line):
 		sublime.set_clipboard(line)
 		self.view.run_command('paste_and_indent')
+
+	def isInsertedTextShouldBeUnderLine(self, line):
+		if (line.strip().startswith("return")):
+			return false
+		return true
 
 	def findTarget(self, lineRaw):
 		line = lineRaw.strip();
@@ -38,20 +58,22 @@ class ExampleCommand(sublime_plugin.TextCommand):
 
 		return target
 
-	def prepareText(self, variable):
-		text = "console.log(\"{0}\"); // TODO: do not forget to delete".format(variable)
-		text += "\nconsole.log({0}); // TODO: do not forget to delete".format(variable)
+	def prepareText(self, expression):
+		text = "console.log(\"{0}\"); // TODO: do not forget to delete".format(expression)
+		text += "\nconsole.log({0}); // TODO: do not forget to delete".format(expression)
 
 		return text;
 
-	def configureCursor(self, line):
-		# TODO if return at first place of line
-		if (line.strip().startswith("return")):
-			self.setCursorColumnPosition(0)
+	def configureCursor(self, target):
+		if (target.type == "assigment"):
+			self.setCursorToEndOfLine()
 		else:
-			self.setCursorToEndOfLine(line)
+			self.setCursorColumnPosition(0)
 
-	def setCursorToEndOfLine(self, line):
+	def setCursorToEndOfLine(self, line=None):
+		if (line == None):
+			line = self.view.substr(self.view.line(self.view.sel()[0]))
+
 		self.setCursorColumnPosition(len(line))
 
 	def setCursorColumnPosition(self, col):
@@ -64,15 +86,27 @@ class ExampleCommand(sublime_plugin.TextCommand):
 		self.view.sel().add(sublime.Region(point))
 
 	def findVaribleAssignment(self, line):
-		match = re.match(r'(var|const|let)?( )?(.*)( )?=', line)
+
+		match = re.match(r'^(?!.*(while|if))(var|const|let )?(.*)=', line)
 
 		if match != None:
-			return match.group(3)
+			return TargetParam(match.group(3), "assigment") 
 		else:
 			return None
 
 	def findVariableUsing(self, line):
-		
+
+		if (line.strip().startswith("return")):
+			expression = line[line.find("return")+6 : None].replace(";", "")
+		else:
+			expression = self.getBracketExpression(line)
+
+		if (expression == None):
+			return None
+
+		return TargetParam(expression, "using") 
+
+	def getBracketExpression(self, line):
 		bracketIndex = line.find("(")
 
 		if bracketIndex == -1:
@@ -82,7 +116,5 @@ class ExampleCommand(sublime_plugin.TextCommand):
 
 		self.view.run_command('expand_selection', {"to": "brackets"})
 		result = self.view.substr(self.view.sel()[0]) 
-
-		self.setCursorToEndOfLine(line)
 
 		return result
