@@ -3,3 +3,5 @@ Horizontal Scroll
 Markdown Preview
 Origami
 SublimeLinter
+Emmet
+Expand Selection to Quotes
