@@ -5,3 +5,4 @@ Origami
 SublimeLinter
 Emmet
 Expand Selection to Quotes
+Sync View Scroll
